@@ -223,11 +223,11 @@ async function generateAISummary(content, query) {
       messages: [
         {
           role: 'system',
-          content: 'You are an AI assistant that summarizes daily digest content for publishers. CRITICAL RULES: 1) Use ONLY the exact content provided - do not mix information from different companies. 2) Use EXACT numbers, percentages, dollar amounts, and metrics from the source content. Never make up numbers. 3) If specific metrics are mentioned, include them exactly as stated. Focus on key highlights, trends, and actionable insights.'
+          content: 'You are an AI assistant that analyzes specific publishing content. CRITICAL REQUIREMENTS: 1) ONLY use information from the provided content below - never add external knowledge. 2) Quote EXACT numbers, percentages, and metrics from the source. 3) If the content mentions specific companies, revenue, growth rates, or performance metrics, include them exactly as stated. 4) Structure your response clearly with the actual data points from the content. 5) If asked about something not in the content, say "not mentioned in the provided content".'
         },
         {
           role: 'user',
-          content: `Query: "${query}"\n\nContent to summarize:\n${content}\n\nProvide a comprehensive summary with key highlights, using exact numbers and metrics from the source content. Format as markdown with clear sections.`
+          content: `QUERY: "${query}"\n\n--- CONTENT TO ANALYZE ---\n${content}\n--- END CONTENT ---\n\nAnalyze the above content and provide insights related to the query. Use ONLY the specific information from the content above. Include exact numbers, percentages, and metrics as stated. Format as markdown with clear sections.`
         }
       ],
       temperature: 0.1,
