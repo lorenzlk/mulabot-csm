@@ -1,0 +1,67 @@
+{
+  "name": "mulabot-csm",
+  "version": "1.0.0",
+  "description": "AI-powered assistant that analyzes daily publishing content and provides intelligent summaries for account management teams",
+  "main": "production-webhook-server.js",
+  "scripts": {
+    "start": "node production-webhook-server.js",
+    "dev": "nodemon production-webhook-server.js",
+    "test": "jest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "db:init": "node scripts/init-database.js",
+    "db:migrate": "node scripts/migrate-database.js",
+    "deploy": "npm run lint && npm run test && npm run build",
+    "build": "echo 'Build complete'",
+    "logs:production": "tail -f combined.log",
+    "logs:error": "tail -f error.log",
+    "health": "curl -f http://localhost:3000/health || exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "winston": "^3.11.0",
+    "@sentry/node": "^7.81.1",
+    "openai": "^4.20.1",
+    "@slack/bolt": "^3.14.0",
+    "axios": "^1.6.2",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "slack-bot",
+    "ai-assistant",
+    "openai",
+    "publishing",
+    "content-analysis",
+    "automation",
+    "railway",
+    "postgresql",
+    "webhook"
+  ],
+  "author": "Logan Lorenz <logan.lorenz@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lorenzlk/mulabot-csm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lorenzlk/mulabot-csm/issues"
+  },
+  "homepage": "https://github.com/lorenzlk/mulabot-csm#readme"
+}

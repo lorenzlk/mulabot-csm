@@ -1,0 +1,6 @@
+[deploy]
+healthcheckPath = "/health"
+restartPolicyType = "always"
+
+[env]
+NODE_ENV = "production" 

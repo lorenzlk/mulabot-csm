@@ -1,0 +1,105 @@
+{
+  "name": "weekly-publisher-digest-pinecone",
+  "version": "1.0.0",
+  "description": "Pinecone vector database integration for Weekly Publisher Digest Assistant",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "setup": "node scripts/setup.js",
+    "init-index": "node scripts/init-index.js",
+    "health-check": "node scripts/health-check.js",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "dev": "nodemon index.js",
+    "build": "npm run lint && npm test",
+    "clean": "rimraf node_modules package-lock.json",
+    "reinstall": "npm run clean && npm install"
+  },
+  "keywords": [
+    "pinecone",
+    "vector-database",
+    "embeddings",
+    "openai",
+    "publisher-digest",
+    "search",
+    "similarity"
+  ],
+  "author": "Weekly Publisher Digest Team",
+  "license": "MIT",
+  "dependencies": {
+    "@pinecone-database/pinecone": "^1.1.2",
+    "openai": "^4.24.1",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0",
+    "axios": "^1.6.2",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "uuid": "^9.0.1",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "rate-limiter-flexible": "^3.0.7"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8",
+    "nodemon": "^3.0.2",
+    "eslint": "^8.54.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "prettier": "^3.1.0",
+    "supertest": "^6.3.3",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-repo/weekly-publisher-digest.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-repo/weekly-publisher-digest/issues"
+  },
+  "homepage": "https://github.com/your-repo/weekly-publisher-digest#readme",
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!node_modules/**",
+      "!coverage/**",
+      "!jest.config.js"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.js",
+      "**/?(*.)+(spec|test).js"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "standard"
+    ],
+    "env": {
+      "node": true,
+      "jest": true
+    },
+    "rules": {
+      "no-console": "off",
+      "semi": ["error", "always"]
+    }
+  }
+} 

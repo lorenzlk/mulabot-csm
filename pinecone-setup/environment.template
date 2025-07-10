@@ -1,0 +1,77 @@
+# Pinecone Configuration
+PINECONE_API_KEY=your-pinecone-api-key-here
+PINECONE_ENVIRONMENT=us-west1-gcp-free
+PINECONE_INDEX_NAME=weekly-publisher-digest
+PINECONE_PROJECT_ID=your-project-id-here
+
+# OpenAI Configuration (for embeddings)
+OPENAI_API_KEY=your-openai-api-key-here
+OPENAI_ORG_ID=your-openai-org-id-here
+
+# Application Configuration
+NODE_ENV=development
+PORT=3000
+HOST=localhost
+
+# Logging Configuration
+LOG_LEVEL=info
+LOG_FILE=./logs/pinecone.log
+ENABLE_FILE_LOGGING=false
+
+# Performance Configuration
+ENABLE_METRICS=true
+METRICS_INTERVAL=60000
+SLOW_QUERY_THRESHOLD=5000
+
+# Health Check Configuration
+HEALTH_CHECK_INTERVAL=300000
+HEALTH_CHECK_TIMEOUT=10000
+HEALTH_CHECK_RETRIES=2
+
+# Security Configuration
+ENABLE_RATE_LIMITING=true
+RATE_LIMIT_WINDOW=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Webhook Configuration (for notifications)
+WEBHOOK_URL=https://webhook.pipedream.com/your-webhook-url
+WEBHOOK_SECRET=your-webhook-secret-key
+
+# Google Apps Script Integration
+GAS_WEBHOOK_URL=https://script.google.com/macros/s/your-script-id/exec
+GAS_API_KEY=your-gas-api-key
+
+# Development Configuration
+ENABLE_CORS=true
+ENABLE_COMPRESSION=true
+ENABLE_HELMET=true
+
+# Test Configuration
+TEST_INDEX_NAME=weekly-publisher-digest-test
+ENABLE_TEST_CLEANUP=true
+
+# Batch Processing Configuration
+MAX_BATCH_SIZE=100
+MAX_CONCURRENT_BATCHES=5
+BATCH_RETRY_ATTEMPTS=3
+BATCH_RETRY_DELAY=1000
+
+# Vector Configuration
+VECTOR_DIMENSIONS=1536
+SIMILARITY_METRIC=cosine
+DEFAULT_TOP_K=10
+
+# Publisher Configuration
+ENABLE_PUBLISHER_ALIASES=true
+ENABLE_FUZZY_MATCHING=true
+
+# Content Processing Configuration
+ENABLE_CONTENT_VALIDATION=true
+ENABLE_METADATA_VALIDATION=true
+ALLOW_EXTRA_METADATA_FIELDS=false
+
+# Monitoring Configuration
+ENABLE_EXTERNAL_MONITORING=false
+MONITORING_WEBHOOK_URL=https://your-monitoring-service.com/webhook
+ALERT_ON_HIGH_ERROR_RATE=true
+ERROR_RATE_THRESHOLD=10 

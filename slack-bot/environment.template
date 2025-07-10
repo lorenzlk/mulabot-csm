@@ -1,0 +1,42 @@
+# Slack App Configuration
+SLACK_BOT_TOKEN=xoxb-your-bot-token-here
+SLACK_SIGNING_SECRET=your-signing-secret-here
+
+# Development Mode (Socket Mode with ngrok)
+SLACK_SOCKET_MODE=true
+SLACK_APP_TOKEN=xapp-your-app-token-here
+
+# Production Mode (Web App/API)
+# SLACK_SOCKET_MODE=false
+# PORT=3000
+# HOST=0.0.0.0
+
+# Pinecone Configuration
+PINECONE_API_KEY=your-pinecone-api-key
+PINECONE_ENVIRONMENT=us-east-1
+PINECONE_INDEX_NAME=mulabot-csm
+
+# OpenAI Configuration  
+OPENAI_API_KEY=your-openai-api-key
+
+# Application Settings
+NODE_ENV=development
+LOG_LEVEL=info
+
+# Rate Limiting (Production)
+ENABLE_RATE_LIMITING=true
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Security (Production)
+ENABLE_CORS=true
+ENABLE_HELMET=true
+ENABLE_COMPRESSION=true
+
+# Health Check Configuration
+HEALTH_CHECK_ENABLED=true
+HEALTH_CHECK_ENDPOINT=/health
+
+# Monitoring (Optional)
+ENABLE_METRICS=false
+METRICS_ENDPOINT=/metrics 
