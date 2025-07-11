@@ -45,18 +45,6 @@ app.set('trust proxy', 1);
 // Security middleware
 app.use(helmet());
 app.use(cors());
-
-// Middleware to capture raw body for signature validation
-app.use('/webhook', (req, res, next) => {
-  let data = '';
-  req.setEncoding('utf8');
-  req.on('data', chunk => data += chunk);
-  req.on('end', () => {
-    req.rawBody = data;
-    next();
-  });
-});
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -317,7 +305,7 @@ app.post('/webhook', async (req, res) => {
     logger.info('Webhook received - Body keys:', Object.keys(req.body));
     
     // Temporarily disable signature validation for testing
-    logger.info('⚠️  SIGNATURE VALIDATION DISABLED FOR TESTING');
+    logger.info('⚠️  SIGNATURE VALIDATION DISABLED FOR TESTING - Build: ' + new Date().toISOString());
     
     // TODO: Re-enable signature validation once webhook processing is working
     // if (process.env.WEBHOOK_SECRET) {
