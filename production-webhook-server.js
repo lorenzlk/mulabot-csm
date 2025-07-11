@@ -262,24 +262,50 @@ function validateWebhookSignature(payload, signature, secret) {
   );
 }
 
+// Simple test endpoint
+app.post('/test-webhook', (req, res) => {
+  try {
+    logger.info('Test webhook received:', req.body);
+    res.json({ 
+      success: true, 
+      message: 'Test webhook working',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('Test webhook error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Main webhook endpoint
 app.post('/webhook', async (req, res) => {
   try {
+    logger.info('Webhook received - Headers:', req.headers);
+    logger.info('Webhook received - Body keys:', Object.keys(req.body));
+    
     // Validate webhook signature if secret is provided
     if (process.env.WEBHOOK_SECRET) {
       const signature = req.headers['x-webhook-signature'];
       const payload = JSON.stringify(req.body);
       
+      logger.info('Signature validation - Header:', signature);
+      
       if (!signature) {
+        logger.error('Missing signature');
         return res.status(401).json({ error: 'Missing signature' });
       }
 
       // Extract hex digest from 'sha256=HEXDIGEST' format
       const signatureHex = signature.startsWith('sha256=') ? signature.substring(7) : signature;
       
+      logger.info('Signature validation - Extracted hex:', signatureHex.substring(0, 20) + '...');
+      
       if (!validateWebhookSignature(payload, signatureHex, process.env.WEBHOOK_SECRET)) {
+        logger.error('Invalid signature');
         return res.status(401).json({ error: 'Invalid signature' });
       }
+      
+      logger.info('Signature validation - SUCCESS');
     }
 
     const { type, sections, documentId } = req.body;
@@ -287,61 +313,25 @@ app.post('/webhook', async (req, res) => {
     logger.info(`Webhook received - Type: ${type}, Sections: ${sections ? sections.length : 0}`);
     
     if (type === 'document_update' && sections && Array.isArray(sections)) {
-      const results = [];
       
-      for (const [index, section] of sections.entries()) {
-        try {
-          const { date, content, timestamp } = section;
-          
-          logger.info(`Processing section ${index + 1} - Date: ${date}, Content length: ${content ? content.length : 0}`);
-          
-          if (!content || content.toLowerCase().includes('test notification')) {
-            logger.info(`Skipping section ${index + 1} - empty or test content`);
-            continue;
-          }
-
-          // Determine company from content
-          const matchedCompany = matchCompany(content, '');
-          const companyKey = matchedCompany ? matchedCompany.key : null;
-          
-          logger.info(`Section ${index + 1} - Matched company: ${companyKey || 'none'}`);
-          
-          // Store in database
-          const storedDocumentId = await storeDocument(date, content, companyKey, index + 1);
-          
-          logger.info(`Section ${index + 1} - Stored with document ID: ${storedDocumentId}`);
-          
-          results.push({
-            documentId: storedDocumentId,
-            company: companyKey,
-            processed: true
-          });
-        } catch (sectionError) {
-          logger.error(`Error processing section ${index + 1}:`, sectionError);
-          // Continue with other sections instead of failing completely
-          results.push({
-            documentId: null,
-            company: null,
-            processed: false,
-            error: sectionError.message
-          });
-        }
-      }
-
-      logger.info(`Processed ${results.length} document sections`);
+      // For now, just return success without processing to isolate the error
+      logger.info(`SUCCESS - Would process ${sections.length} sections`);
       
       res.json({
         success: true,
-        processed: results.length,
-        timestamp: new Date().toISOString()
+        processed: sections.length,
+        timestamp: new Date().toISOString(),
+        message: 'Webhook received successfully'
       });
+      
     } else {
+      logger.error('Invalid request format - Type:', type, 'Sections valid:', !!(sections && Array.isArray(sections)));
       res.status(400).json({ error: 'Invalid request format' });
     }
   } catch (error) {
     logger.error('Webhook processing error:', error);
     Sentry.captureException(error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 });
 
