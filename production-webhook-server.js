@@ -39,6 +39,9 @@ const pool = new Pool({
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for Railway deployment
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(cors());
@@ -267,35 +270,62 @@ app.post('/webhook', async (req, res) => {
       const signature = req.headers['x-webhook-signature'];
       const payload = JSON.stringify(req.body);
       
-      if (!signature || !validateWebhookSignature(payload, signature, process.env.WEBHOOK_SECRET)) {
+      if (!signature) {
+        return res.status(401).json({ error: 'Missing signature' });
+      }
+
+      // Extract hex digest from 'sha256=HEXDIGEST' format
+      const signatureHex = signature.startsWith('sha256=') ? signature.substring(7) : signature;
+      
+      if (!validateWebhookSignature(payload, signatureHex, process.env.WEBHOOK_SECRET)) {
         return res.status(401).json({ error: 'Invalid signature' });
       }
     }
 
     const { type, sections, documentId } = req.body;
     
+    logger.info(`Webhook received - Type: ${type}, Sections: ${sections ? sections.length : 0}`);
+    
     if (type === 'document_update' && sections && Array.isArray(sections)) {
       const results = [];
       
       for (const [index, section] of sections.entries()) {
-        const { date, content, timestamp } = section;
-        
-        if (!content || content.toLowerCase().includes('test notification')) {
-          continue;
-        }
+        try {
+          const { date, content, timestamp } = section;
+          
+          logger.info(`Processing section ${index + 1} - Date: ${date}, Content length: ${content ? content.length : 0}`);
+          
+          if (!content || content.toLowerCase().includes('test notification')) {
+            logger.info(`Skipping section ${index + 1} - empty or test content`);
+            continue;
+          }
 
-        // Determine company from content
-        const matchedCompany = matchCompany(content, '');
-        const companyKey = matchedCompany ? matchedCompany.key : null;
-        
-        // Store in database
-        const documentId = await storeDocument(date, content, companyKey, index + 1);
-        
-        results.push({
-          documentId,
-          company: companyKey,
-          processed: true
-        });
+          // Determine company from content
+          const matchedCompany = matchCompany(content, '');
+          const companyKey = matchedCompany ? matchedCompany.key : null;
+          
+          logger.info(`Section ${index + 1} - Matched company: ${companyKey || 'none'}`);
+          
+          // Store in database
+          const storedDocumentId = await storeDocument(date, content, companyKey, index + 1);
+          
+          logger.info(`Section ${index + 1} - Stored with document ID: ${storedDocumentId}`);
+          
+          results.push({
+            documentId: storedDocumentId,
+            company: companyKey,
+            processed: true
+          });
+        } catch (sectionError) {
+          logger.error(`Error processing section ${index + 1}:`, sectionError);
+          // Continue with other sections instead of failing completely
+          results.push({
+            documentId: null,
+            company: null,
+            processed: false,
+            error: sectionError.message
+          });
+        }
       }
 
       logger.info(`Processed ${results.length} document sections`);
