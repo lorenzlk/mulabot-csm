@@ -45,6 +45,18 @@ app.set('trust proxy', 1);
 // Security middleware
 app.use(helmet());
 app.use(cors());
+
+// Middleware to capture raw body for signature validation
+app.use('/webhook', (req, res, next) => {
+  let data = '';
+  req.setEncoding('utf8');
+  req.on('data', chunk => data += chunk);
+  req.on('end', () => {
+    req.rawBody = data;
+    next();
+  });
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -252,14 +264,35 @@ async function generateAISummary(content, query) {
 
 // Webhook signature validation
 function validateWebhookSignature(payload, signature, secret) {
-  const hmac = crypto.createHmac('sha256', secret);
-  hmac.update(payload);
-  const expectedSignature = hmac.digest('hex');
-  
-  return crypto.timingSafeEqual(
-    Buffer.from(signature, 'hex'),
-    Buffer.from(expectedSignature, 'hex')
-  );
+  try {
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(payload);
+    const expectedSignature = hmac.digest('hex');
+    
+    // Normalize both signatures to lowercase hex strings
+    const normalizedSignature = signature.toLowerCase();
+    const normalizedExpected = expectedSignature.toLowerCase();
+    
+    // Check if lengths match
+    if (normalizedSignature.length !== normalizedExpected.length) {
+      logger.error(`Signature length mismatch - received: ${normalizedSignature.length}, expected: ${normalizedExpected.length}`);
+      logger.error(`Received signature: ${normalizedSignature.substring(0, 20)}...`);
+      logger.error(`Expected signature: ${normalizedExpected.substring(0, 20)}...`);
+      return false;
+    }
+    
+    logger.info(`Signature lengths match: ${normalizedSignature.length} characters`);
+    logger.info(`Signatures match: ${normalizedSignature === normalizedExpected}`);
+    
+    // Use constant-time comparison
+    return crypto.timingSafeEqual(
+      Buffer.from(normalizedSignature, 'hex'),
+      Buffer.from(normalizedExpected, 'hex')
+    );
+  } catch (error) {
+    logger.error('Signature validation error:', error);
+    return false;
+  }
 }
 
 // Simple test endpoint
@@ -286,7 +319,7 @@ app.post('/webhook', async (req, res) => {
     // Validate webhook signature if secret is provided
     if (process.env.WEBHOOK_SECRET) {
       const signature = req.headers['x-webhook-signature'];
-      const payload = JSON.stringify(req.body);
+      const payload = req.rawBody || JSON.stringify(req.body);
       
       logger.info('Signature validation - Header:', signature);
       
@@ -299,6 +332,10 @@ app.post('/webhook', async (req, res) => {
       const signatureHex = signature.startsWith('sha256=') ? signature.substring(7) : signature;
       
       logger.info('Signature validation - Extracted hex:', signatureHex.substring(0, 20) + '...');
+      logger.info('Signature validation - Full length:', signatureHex.length);
+      logger.info('Signature validation - Payload length:', payload.length);
+      logger.info('Signature validation - Payload source:', req.rawBody ? 'raw body' : 'JSON stringified');
+      logger.info('Signature validation - Payload preview:', payload.substring(0, 100) + '...');
       
       if (!validateWebhookSignature(payload, signatureHex, process.env.WEBHOOK_SECRET)) {
         logger.error('Invalid signature');
