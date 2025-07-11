@@ -473,10 +473,12 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  logger.info(`🚀 Production webhook server running on port ${PORT}`);
+  const startTime = new Date().toISOString();
+  logger.info(`🚀 Production webhook server running on port ${PORT} - DEPLOY: ${startTime}`);
   logger.info(`🤖 OpenAI: ${openai ? 'ENABLED' : 'DISABLED'}`);
   logger.info(`💬 Slack: ${slack ? 'ENABLED' : 'DISABLED'}`);
   logger.info(`🗄️ Database: ${process.env.DATABASE_URL ? 'CONNECTED' : 'NOT CONFIGURED'}`);
+  logger.info(`⚠️  SIGNATURE VALIDATION IS DISABLED FOR TESTING`);
 });
 
 // Graceful shutdown

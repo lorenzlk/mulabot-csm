@@ -1,6 +1,6 @@
 {
   "name": "mulabot-csm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI-powered assistant that analyzes daily publishing content and provides intelligent summaries for account management teams",
   "main": "production-webhook-server.js",
   "scripts": {

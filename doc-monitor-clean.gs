@@ -6,7 +6,8 @@
 
 // Configuration constants
 const TARGET_DOC_ID = '1DiRcu3pLpCXuYlJ7r19tzsHxI89YWw2BfNFkvOdchsM';
-const PIPEDREAM_WEBHOOK_URL = 'https://d8a85de8638e.ngrok-free.app/webhook';
+const PIPEDREAM_WEBHOOK_URL = 'https://mulabot-web-production.up.railway.app/webhook';
+const WEBHOOK_SECRET = '2ae644c8dbfd5f73127f23e1493470eb'; // Production webhook secret
 
 /**
  * Initialize the project and set up necessary configurations
@@ -302,14 +303,25 @@ function notifyPipedream(contentSections) {
     
     console.log('Sending webhook notification - Sections: ' + payload.sections.length);
     
-    // Send POST request (simple and reliable)
+    // Generate HMAC signature for webhook security
+    const payloadString = JSON.stringify(payload);
+    const signature = Utilities.computeHmacSha256Signature(payloadString, WEBHOOK_SECRET);
+    const signatureHex = Utilities.base64Encode(signature).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    const hmacSignature = signature.map(function(byte) {
+      return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('');
+    
+    console.log('Generated HMAC signature for webhook security');
+    
+    // Send POST request with signature
     const response = UrlFetchApp.fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Google-Apps-Script/1.0'
+        'User-Agent': 'Google-Apps-Script/1.0',
+        'X-Webhook-Signature': 'sha256=' + hmacSignature
       },
-      payload: JSON.stringify(payload),
+      payload: payloadString,
       muteHttpExceptions: true
     });
     
