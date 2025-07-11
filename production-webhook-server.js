@@ -469,6 +469,8 @@ app.get('/health', async (req, res) => {
     
     res.json({
       status: 'healthy',
+      version: '1.0.1-FIXED',
+      deployment: 'signature-validation-disabled',
       timestamp: new Date().toISOString(),
       services: {
         database: 'connected',
