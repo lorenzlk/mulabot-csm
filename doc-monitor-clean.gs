@@ -319,7 +319,8 @@ function notifyPipedream(contentSections) {
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'Google-Apps-Script/1.0',
-        'X-Webhook-Signature': 'sha256=' + hmacSignature
+        'X-Webhook-Signature': 'sha256=' + hmacSignature,
+        'ngrok-skip-browser-warning': 'true'
       },
       payload: payloadString,
       muteHttpExceptions: true
@@ -449,6 +450,45 @@ function testWebhookNotification() {
     return {
       success: false,
       error: error.toString()
+    };
+  }
+}
+
+/**
+ * Debug function to test ngrok URL directly
+ */
+function testNgrokUrl() {
+  try {
+    const testUrl = 'https://4ce11dd4b9bf.ngrok-free.app/health';
+    console.log('Testing ngrok URL: ' + testUrl);
+    
+    const response = UrlFetchApp.fetch(testUrl, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      },
+      muteHttpExceptions: true
+    });
+    
+    const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
+    
+    console.log('Ngrok test - Status: ' + responseCode);
+    console.log('Ngrok test - Response: ' + responseText);
+    
+    return {
+      success: true,
+      responseCode: responseCode,
+      responseText: responseText,
+      timestamp: new Date().toISOString()
+    };
+    
+  } catch (error) {
+    console.log('Ngrok test failed: ' + error.toString());
+    return {
+      success: false,
+      error: error.toString(),
+      timestamp: new Date().toISOString()
     };
   }
 }
