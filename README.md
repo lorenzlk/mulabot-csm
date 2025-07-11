@@ -11,14 +11,6 @@ MulaBot is an intelligent Slack bot that analyzes daily publishing content and p
 - **Cost Tracking**: Monitors OpenAI API usage and costs
 - **Production Ready**: Deployed on Railway with PostgreSQL database
 
-## 🏢 Supported Publishers
-
-- **On3** - Sports content and analytics
-- **Swimming World** - Swimming industry news and insights
-- **She Media** - Women-focused content and advertising
-- **Rev Content** - Content discovery and recommendation
-- **Brit+Co** - DIY, lifestyle, and creative content
-
 ## 🛠️ Tech Stack
 
 - **Backend**: Node.js, Express.js
