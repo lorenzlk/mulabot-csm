@@ -283,6 +283,32 @@ function validateWebhookSignature(payload, signature, secret) {
   }
 }
 
+// Simple alive test endpoint
+app.get('/alive', (req, res) => {
+  res.json({ 
+    status: 'alive',
+    version: '1.0.1',
+    timestamp: new Date().toISOString(),
+    message: 'Server is running with latest code'
+  });
+});
+
+// Simple webhook test without any validation
+app.post('/webhook-test', (req, res) => {
+  try {
+    console.log('TEST WEBHOOK RECEIVED:', req.body);
+    res.json({ 
+      success: true,
+      message: 'Test webhook received successfully',
+      timestamp: new Date().toISOString(),
+      sectionsReceived: req.body.sections ? req.body.sections.length : 0
+    });
+  } catch (error) {
+    console.error('TEST WEBHOOK ERROR:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Simple test endpoint
 app.post('/test-webhook', (req, res) => {
   try {
