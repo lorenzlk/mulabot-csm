@@ -2,10 +2,10 @@
   "name": "mulabot-csm",
   "version": "1.0.1",
   "description": "AI-powered assistant that analyzes daily publishing content and provides intelligent summaries for account management teams",
-  "main": "simple-webhook-server.js",
+  "main": "production-webhook-server.js",
   "scripts": {
-    "start": "node simple-webhook-server.js",
-    "dev": "nodemon simple-webhook-server.js",
+    "start": "node production-webhook-server.js",
+    "dev": "nodemon production-webhook-server.js",
     "test": "jest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
