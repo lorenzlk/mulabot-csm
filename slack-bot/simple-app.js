@@ -4,6 +4,7 @@
  */
 
 const { App } = require('@slack/bolt');
+const axios = require('axios');
 require('dotenv').config();
 
 // Initialize the app with bot token and signing secret
@@ -12,11 +13,24 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET || 'test-secret',
   socketMode: process.env.SLACK_SOCKET_MODE === 'true',
   appToken: process.env.SLACK_APP_TOKEN || 'xapp-test-token',
-  port: process.env.PORT || 3000
+  port: process.env.PORT || 3001 // Different port from webhook server
 });
 
-// Note: Health check endpoints are handled differently in Socket Mode vs HTTP Mode
-// For Socket Mode (ngrok), health checks aren't needed as there's no HTTP endpoint
+// Webhook server URL (our local server)
+const WEBHOOK_SERVER_URL = process.env.WEBHOOK_SERVER_URL || 'http://localhost:3000';
+
+/**
+ * Query webhook server for data
+ */
+async function queryWebhookServer(searchQuery = '') {
+  try {
+    const response = await axios.get(`${WEBHOOK_SERVER_URL}/test`);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Failed to query webhook server:', error.message);
+    return { sectionsStored: 0, sections: [] };
+  }
+}
 
 /**
  * Handle /accountsummary command (simplified version)
@@ -64,30 +78,92 @@ app.command('/accountsummary', async ({ command, ack, respond }) => {
 });
 
 /**
- * Handle /mula command (alias for /accountsummary)
+ * Handle /mula command (now with real data!)
  */
 app.command('/mula', async ({ command, ack, respond }) => {
   await ack();
 
   const text = command.text.trim();
-  const publisher = text.split(' ')[0] || 'Unknown';
-  const days = parseInt(text.split(' ')[1]) || 7;
+  const searchQuery = text || '';
 
+  // Show loading message
   await respond({
     response_type: 'in_channel',
-    text: `💰 Mula CS Agent activated!`,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `💰 *Mula CS Agent Activated!*\n\n*Publisher:* ${publisher}\n*Time Period:* ${days} days\n*Status:* ✅ Bot response working!\n\n_Simplified test version - full features coming soon._`
-        }
-      }
-    ]
+    text: `💰 Mula CS Agent searching...`,
   });
 
-  console.log(`✅ Mula command received: ${publisher}, ${days} days, user: ${command.user_name}`);
+  try {
+    // Query the webhook server for real data
+    const webhookData = await queryWebhookServer(searchQuery);
+    
+    if (webhookData.sectionsStored === 0) {
+      await respond({
+        response_type: 'in_channel',
+        text: `💰 Mula CS Agent Results`,
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `💰 *Mula CS Agent Results*\n\n📊 *Status:* No data found\n🔍 *Query:* "${searchQuery}"\n📡 *Webhook Server:* Connected ✅\n📈 *Sections Available:* ${webhookData.sectionsStored}\n\n_Send test data to your webhook to see results!_`
+            }
+          }
+        ]
+      });
+    } else {
+      // Process the sections data
+      const sections = webhookData.sections || [];
+      const filteredSections = searchQuery 
+        ? sections.filter(section => 
+            section.content.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : sections;
+
+      // Create summary of first few results
+      const sampleContent = filteredSections.slice(0, 2).map((section, index) => 
+        `*${index + 1}.* ${section.content.substring(0, 200)}${section.content.length > 200 ? '...' : ''}`
+      ).join('\n\n');
+
+      await respond({
+        response_type: 'in_channel',
+        text: `💰 Mula CS Agent Results`,
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `💰 *Mula CS Agent Results*\n\n🔍 *Query:* "${searchQuery}"\n📊 *Found:* ${filteredSections.length} matching sections\n📈 *Total Available:* ${webhookData.sectionsStored} sections\n📡 *Webhook Server:* Connected ✅`
+            }
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*📋 Sample Results:*\n\n${sampleContent || 'No matching content found.'}`
+            }
+          },
+          {
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: `🎯 End-to-end test: Slack → Webhook Server → Data | Requested by <@${command.user_name}>`
+              }
+            ]
+          }
+        ]
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ Mula command error:', error);
+    await respond({
+      response_type: 'in_channel',
+      text: '❌ Error connecting to webhook server. Make sure it\'s running on port 3000.'
+    });
+  }
+
+  console.log(`✅ Mula command processed: "${searchQuery}", user: ${command.user_name}`);
 });
 
 /**
@@ -122,7 +198,7 @@ app.error((error) => {
  */
 (async () => {
   try {
-    const port = process.env.PORT || 3000;
+    const port = process.env.PORT || 3001;
     
     if (process.env.SLACK_SOCKET_MODE === 'true') {
       // Socket Mode (for ngrok development)
