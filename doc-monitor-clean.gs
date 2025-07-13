@@ -6,7 +6,7 @@
 
 // Configuration
 const DOCUMENT_ID = '1DiRcu3pLpCXuYlJ7r19tzsHxI89YWw2BfNFkvOdchsM';
-const webhookUrl = 'https://510c6ecf934a.ngrok-free.app/webhook';
+const webhookUrl = 'https://mulabot-web-production.up.railway.app/webhook';
 const HMAC_SECRET = 'your-secret-key-here'; // Change this to a secure secret
 
 /**
